@@ -44,7 +44,7 @@ export function Terminal() {
   }, [step]);
 
   return (
-    <div className="w-120 bg-black/50 rounded-lg border border-white/10 backdrop-blur-md p-8 font-mono text-base text-gray-300 pointer-events-auto h-64">
+    <div className="w-full max-w-150 bg-black/50 rounded-lg border border-white/10 backdrop-blur-md p-4 md:p-8 font-mono text-sm md:text-base text-gray-300 pointer-events-auto min-h-50 md:min-h-60">
       <div className="space-y-2">
         <p>
           <span className="text-green-400">➜</span>{" "}
