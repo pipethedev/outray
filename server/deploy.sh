@@ -21,14 +21,21 @@ if pm2 list | grep -q "$BLUE_NAME.*online"; then
   TARGET_PORT=$GREEN_PORT
   TARGET_NAME=$GREEN_NAME
   OLD_NAME=$BLUE_NAME
-elif pm2 list | grep -q "outray-server.*online"; then
-  # Legacy is running (assume it's on 3547), go Green
-  echo "⚠️ Legacy outray-server detected. Treating as Blue."
+elif pm2 list | grep -q "outray.*online" && ! pm2 list | grep -q "$GREEN_NAME.*online"; then
+  # Legacy is running (and it's not Green, and not Blue from above)
+  # It could be "outray" or "outray-server"
+  echo "⚠️ Legacy outray detected. Treating as Blue."
   CURRENT_COLOR="legacy"
   TARGET_COLOR="green"
   TARGET_PORT=$GREEN_PORT
   TARGET_NAME=$GREEN_NAME
-  OLD_NAME="outray-server"
+  
+  # Determine legacy name for stopping later
+  if pm2 list | grep -q "outray-server.*online"; then
+    OLD_NAME="outray-server"
+  else
+    OLD_NAME="outray"
+  fi
 else
   # Default to blue if green is running or neither is running
   CURRENT_COLOR="green"
