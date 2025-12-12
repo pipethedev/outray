@@ -37,21 +37,24 @@ export function WaitlistForm() {
   };
 
   return (
-    <div className="pointer-events-auto">
-      <form onSubmit={handleSubmit} className="flex items-center gap-3">
+    <div className="pointer-events-auto w-full max-w-md">
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col sm:flex-row items-center gap-3 w-full"
+      >
         <input
           type="email"
           placeholder="Enter your email for early access"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           disabled={status === "loading" || status === "success"}
-          className="bg-white/5 border border-white/10 rounded-full px-6 py-4 w-96 text-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all disabled:opacity-50 backdrop-blur-sm"
+          className="bg-white/5 border border-white/10 rounded-full px-6 py-4 w-full text-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all disabled:opacity-50 backdrop-blur-sm"
           required
         />
         <button
           type="submit"
           disabled={status === "loading" || status === "success"}
-          className={`rounded-full p-4 transition-all duration-300 ${
+          className={`rounded-full p-4 transition-all duration-300 w-full sm:w-auto flex justify-center items-center ${
             status === "success"
               ? "bg-green-500 text-white"
               : status === "error"
