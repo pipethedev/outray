@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export function Terminal() {
   const [text, setText] = useState("");
@@ -13,10 +13,9 @@ export function Terminal() {
           setText(command.slice(0, text.length + 1));
         }, 80);
         return () => clearTimeout(timeout);
-      } else {
-        const timeout = setTimeout(() => setStep(1), 300);
-        return () => clearTimeout(timeout);
       }
+      const timeout = setTimeout(() => setStep(1), 300);
+      return () => clearTimeout(timeout);
     }
   }, [text, step]);
 

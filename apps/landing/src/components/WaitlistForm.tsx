@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { ArrowRight, Loader2, Check } from "lucide-react";
+import type { FormEvent } from "react";
+import { ArrowRight, Check, Loader2 } from "lucide-react";
 
 export function WaitlistForm() {
   const [email, setEmail] = useState("");
@@ -7,9 +8,11 @@ export function WaitlistForm() {
     "idle" | "loading" | "success" | "error"
   >("idle");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email) return;
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!email) {
+      return;
+    }
 
     setStatus("loading");
 
@@ -25,16 +28,19 @@ export function WaitlistForm() {
       if (response.ok) {
         setStatus("success");
         setEmail("");
-      } else {
-        setStatus("error");
-        setTimeout(() => setStatus("idle"), 3000);
+        return;
       }
+
+      setStatus("error");
+      setTimeout(() => setStatus("idle"), 3000);
     } catch (error) {
       console.error(error);
       setStatus("error");
       setTimeout(() => setStatus("idle"), 3000);
     }
   };
+
+  const disabled = status === "loading" || status === "success";
 
   return (
     <div className="pointer-events-auto w-full max-w-md">
@@ -46,20 +52,20 @@ export function WaitlistForm() {
           type="email"
           placeholder="Enter your email for early access"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          disabled={status === "loading" || status === "success"}
+          onChange={(event) => setEmail(event.target.value)}
+          disabled={disabled}
           className="bg-white/5 border border-white/10 rounded-full px-6 py-4 w-full text-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all disabled:opacity-50 backdrop-blur-sm"
           required
         />
         <button
           type="submit"
-          disabled={status === "loading" || status === "success"}
+          disabled={disabled}
           className={`rounded-full p-4 transition-all duration-300 w-full sm:w-auto flex justify-center items-center ${
             status === "success"
               ? "bg-green-500 text-white"
               : status === "error"
-              ? "bg-red-500 text-white"
-              : "bg-white text-black hover:bg-gray-200"
+                ? "bg-red-500 text-white"
+                : "bg-white text-black hover:bg-gray-200"
           } disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           {status === "loading" ? (

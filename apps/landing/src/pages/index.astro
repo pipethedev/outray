@@ -9,9 +9,9 @@ import { Landing } from '../components/Landing';
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
+		<title>OutRay - an open source alternative to ngrok</title>
 	</head>
 	<body>
-		<Landing />
+		<Landing client:only="react" />
 	</body>
 </html>
