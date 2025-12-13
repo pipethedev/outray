@@ -21,9 +21,21 @@ function main() {
     process.exit(1);
   }
 
+  let subdomain: string | undefined;
+  const subdomainIndex = args.indexOf("--subdomain");
+  if (subdomainIndex !== -1 && args[subdomainIndex + 1]) {
+    subdomain = args[subdomainIndex + 1];
+  }
+
   const serverUrl = process.env.OUTRAY_SERVER_URL || "wss://api.outray.dev/";
 
-  const client = new OutRayClient(localPort, serverUrl);
+  let apiKey = process.env.OUTRAY_API_KEY;
+  const keyIndex = args.indexOf("--key");
+  if (keyIndex !== -1 && args[keyIndex + 1]) {
+    apiKey = args[keyIndex + 1];
+  }
+
+  const client = new OutRayClient(localPort, serverUrl, apiKey, subdomain);
   client.start();
 
   process.on("SIGINT", () => {
