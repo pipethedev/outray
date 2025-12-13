@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import "../App.css";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { useMemo, useRef, useState, useEffect } from "react";

@@ -8,28 +8,39 @@ export const Route = createFileRoute("/api/tunnel/check-subdomain")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const body = await request.json();
-        const { subdomain, userId } = body;
+        try {
+          const body = await request.json();
+          const { subdomain, userId } = body;
 
-        if (!subdomain) {
+          if (!subdomain) {
+            return json(
+              { allowed: false, error: "Missing subdomain" },
+              { status: 400 },
+            );
+          }
+
+          const existingTunnel = await db.query.tunnels.findFirst({
+            where: eq(tunnels.subdomain, subdomain),
+          });
+
+          if (existingTunnel) {
+            if (userId && existingTunnel.userId === userId) {
+              return json({ allowed: true, type: "owned" });
+            }
+            return json({ allowed: false, error: "Subdomain already taken" });
+          }
+
+          return json({ allowed: true, type: "available" });
+        } catch (error) {
+          console.error("Error in /api/tunnel/check-subdomain:", error);
           return json(
-            { allowed: false, error: "Missing subdomain" },
-            { status: 400 },
+            {
+              allowed: false,
+              error: error instanceof Error ? error.message : "Unknown error",
+            },
+            { status: 500 },
           );
         }
-
-        const existingTunnel = await db.query.tunnels.findFirst({
-          where: eq(tunnels.subdomain, subdomain),
-        });
-
-        if (existingTunnel) {
-          if (userId && existingTunnel.userId === userId) {
-            return json({ allowed: true, type: "owned" });
-          }
-          return json({ allowed: false, error: "Subdomain already taken" });
-        }
-
-        return json({ allowed: true, type: "available" });
       },
     },
   },
