@@ -41,6 +41,12 @@ export interface PongMessage {
   type: "pong";
 }
 
+export interface ErrorMessage {
+  type: "error";
+  code: string;
+  message: string;
+}
+
 export type Message =
   | HelloMessage
   | OpenTunnelMessage
@@ -48,4 +54,5 @@ export type Message =
   | RequestMessage
   | ResponseMessage
   | PingMessage
-  | PongMessage;
+  | PongMessage
+  | ErrorMessage;
