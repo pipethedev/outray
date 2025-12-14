@@ -18,7 +18,10 @@ import { Route as DashSettingsRouteImport } from './routes/dash/settings'
 import { Route as DashInstallRouteImport } from './routes/dash/install'
 import { Route as ApiAuthTokensRouteImport } from './routes/api/auth-tokens'
 import { Route as DashTunnelsIndexRouteImport } from './routes/dash/tunnels/index'
+import { Route as ApiTunnelsIndexRouteImport } from './routes/api/tunnels/index'
 import { Route as DashTunnelsTunnelIdRouteImport } from './routes/dash/tunnels/$tunnelId'
+import { Route as ApiTunnelsTunnelIdRouteImport } from './routes/api/tunnels/$tunnelId'
+import { Route as ApiTunnelRegisterRouteImport } from './routes/api/tunnel/register'
 import { Route as ApiTunnelCheckSubdomainRouteImport } from './routes/api/tunnel/check-subdomain'
 import { Route as ApiTunnelAuthRouteImport } from './routes/api/tunnel/auth'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -68,10 +71,25 @@ const DashTunnelsIndexRoute = DashTunnelsIndexRouteImport.update({
   path: '/tunnels/',
   getParentRoute: () => DashRoute,
 } as any)
+const ApiTunnelsIndexRoute = ApiTunnelsIndexRouteImport.update({
+  id: '/api/tunnels/',
+  path: '/api/tunnels/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashTunnelsTunnelIdRoute = DashTunnelsTunnelIdRouteImport.update({
   id: '/tunnels/$tunnelId',
   path: '/tunnels/$tunnelId',
   getParentRoute: () => DashRoute,
+} as any)
+const ApiTunnelsTunnelIdRoute = ApiTunnelsTunnelIdRouteImport.update({
+  id: '/api/tunnels/$tunnelId',
+  path: '/api/tunnels/$tunnelId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTunnelRegisterRoute = ApiTunnelRegisterRouteImport.update({
+  id: '/api/tunnel/register',
+  path: '/api/tunnel/register',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiTunnelCheckSubdomainRoute = ApiTunnelCheckSubdomainRouteImport.update({
   id: '/api/tunnel/check-subdomain',
@@ -101,7 +119,10 @@ export interface FileRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/tunnel/auth': typeof ApiTunnelAuthRoute
   '/api/tunnel/check-subdomain': typeof ApiTunnelCheckSubdomainRoute
+  '/api/tunnel/register': typeof ApiTunnelRegisterRoute
+  '/api/tunnels/$tunnelId': typeof ApiTunnelsTunnelIdRoute
   '/dash/tunnels/$tunnelId': typeof DashTunnelsTunnelIdRoute
+  '/api/tunnels': typeof ApiTunnelsIndexRoute
   '/dash/tunnels': typeof DashTunnelsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -115,7 +136,10 @@ export interface FileRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/tunnel/auth': typeof ApiTunnelAuthRoute
   '/api/tunnel/check-subdomain': typeof ApiTunnelCheckSubdomainRoute
+  '/api/tunnel/register': typeof ApiTunnelRegisterRoute
+  '/api/tunnels/$tunnelId': typeof ApiTunnelsTunnelIdRoute
   '/dash/tunnels/$tunnelId': typeof DashTunnelsTunnelIdRoute
+  '/api/tunnels': typeof ApiTunnelsIndexRoute
   '/dash/tunnels': typeof DashTunnelsIndexRoute
 }
 export interface FileRoutesById {
@@ -131,7 +155,10 @@ export interface FileRoutesById {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/tunnel/auth': typeof ApiTunnelAuthRoute
   '/api/tunnel/check-subdomain': typeof ApiTunnelCheckSubdomainRoute
+  '/api/tunnel/register': typeof ApiTunnelRegisterRoute
+  '/api/tunnels/$tunnelId': typeof ApiTunnelsTunnelIdRoute
   '/dash/tunnels/$tunnelId': typeof DashTunnelsTunnelIdRoute
+  '/api/tunnels/': typeof ApiTunnelsIndexRoute
   '/dash/tunnels/': typeof DashTunnelsIndexRoute
 }
 export interface FileRouteTypes {
@@ -148,7 +175,10 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/tunnel/auth'
     | '/api/tunnel/check-subdomain'
+    | '/api/tunnel/register'
+    | '/api/tunnels/$tunnelId'
     | '/dash/tunnels/$tunnelId'
+    | '/api/tunnels'
     | '/dash/tunnels'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -162,7 +192,10 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/tunnel/auth'
     | '/api/tunnel/check-subdomain'
+    | '/api/tunnel/register'
+    | '/api/tunnels/$tunnelId'
     | '/dash/tunnels/$tunnelId'
+    | '/api/tunnels'
     | '/dash/tunnels'
   id:
     | '__root__'
@@ -177,7 +210,10 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/tunnel/auth'
     | '/api/tunnel/check-subdomain'
+    | '/api/tunnel/register'
+    | '/api/tunnels/$tunnelId'
     | '/dash/tunnels/$tunnelId'
+    | '/api/tunnels/'
     | '/dash/tunnels/'
   fileRoutesById: FileRoutesById
 }
@@ -190,6 +226,9 @@ export interface RootRouteChildren {
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiTunnelAuthRoute: typeof ApiTunnelAuthRoute
   ApiTunnelCheckSubdomainRoute: typeof ApiTunnelCheckSubdomainRoute
+  ApiTunnelRegisterRoute: typeof ApiTunnelRegisterRoute
+  ApiTunnelsTunnelIdRoute: typeof ApiTunnelsTunnelIdRoute
+  ApiTunnelsIndexRoute: typeof ApiTunnelsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -257,12 +296,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashTunnelsIndexRouteImport
       parentRoute: typeof DashRoute
     }
+    '/api/tunnels/': {
+      id: '/api/tunnels/'
+      path: '/api/tunnels'
+      fullPath: '/api/tunnels'
+      preLoaderRoute: typeof ApiTunnelsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dash/tunnels/$tunnelId': {
       id: '/dash/tunnels/$tunnelId'
       path: '/tunnels/$tunnelId'
       fullPath: '/dash/tunnels/$tunnelId'
       preLoaderRoute: typeof DashTunnelsTunnelIdRouteImport
       parentRoute: typeof DashRoute
+    }
+    '/api/tunnels/$tunnelId': {
+      id: '/api/tunnels/$tunnelId'
+      path: '/api/tunnels/$tunnelId'
+      fullPath: '/api/tunnels/$tunnelId'
+      preLoaderRoute: typeof ApiTunnelsTunnelIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/tunnel/register': {
+      id: '/api/tunnel/register'
+      path: '/api/tunnel/register'
+      fullPath: '/api/tunnel/register'
+      preLoaderRoute: typeof ApiTunnelRegisterRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/tunnel/check-subdomain': {
       id: '/api/tunnel/check-subdomain'
@@ -315,6 +375,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiTunnelAuthRoute: ApiTunnelAuthRoute,
   ApiTunnelCheckSubdomainRoute: ApiTunnelCheckSubdomainRoute,
+  ApiTunnelRegisterRoute: ApiTunnelRegisterRoute,
+  ApiTunnelsTunnelIdRoute: ApiTunnelsTunnelIdRoute,
+  ApiTunnelsIndexRoute: ApiTunnelsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
