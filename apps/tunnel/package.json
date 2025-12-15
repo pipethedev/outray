@@ -8,6 +8,7 @@
     "start": "node dist/server.js"
   },
   "dependencies": {
+    "@clickhouse/client": "^1.14.0",
     "dotenv": "^17.2.3",
     "ioredis": "^5.4.1",
     "ws": "^8.18.0"
