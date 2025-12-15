@@ -15,7 +15,6 @@ export const Route = createFileRoute("/api/tunnels/")({
           return json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        // Fetch all tunnels for the user with their subdomains
         const userTunnels = await db
           .select({
             id: tunnels.id,
@@ -31,7 +30,6 @@ export const Route = createFileRoute("/api/tunnels/")({
           .leftJoin(subdomains, eq(tunnels.id, subdomains.tunnelId))
           .where(eq(tunnels.userId, session.user.id));
 
-        // Check if tunnel is currently online and format response
         const tunnelsWithStatus = await Promise.all(
           userTunnels.map(async (tunnel) => {
             const isOnline = await redis.exists(
@@ -50,7 +48,9 @@ export const Route = createFileRoute("/api/tunnels/")({
           }),
         );
 
-        return json({ tunnels: tunnelsWithStatus });
+        const activeTunnels = tunnelsWithStatus.filter((t) => t.isOnline);
+
+        return json({ tunnels: activeTunnels });
       },
     },
   },
