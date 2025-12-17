@@ -89,12 +89,13 @@ export class TunnelRouter {
   async reserveTunnel(
     tunnelId: string,
     metadata?: TunnelMetadata,
+    forceTakeover = false,
   ): Promise<boolean> {
     if (!this.redis) {
       return !this.tunnels.has(tunnelId);
     }
 
-    return this.persistTunnelState(tunnelId, "NX", metadata);
+    return this.persistTunnelState(tunnelId, "NX", metadata, forceTakeover);
   }
 
   async shutdown(): Promise<void> {
@@ -195,6 +196,7 @@ export class TunnelRouter {
     tunnelId: string,
     mode: "NX" | "XX",
     metadata?: TunnelMetadata,
+    forceTakeover = false,
   ): Promise<boolean> {
     if (!this.redis) {
       return true;
@@ -226,9 +228,23 @@ export class TunnelRouter {
             try {
               const parsed = JSON.parse(existing);
               if (parsed.userId === metadata.userId) {
-                // Same user, allow takeover
-                await this.redis.set(key, redisValue, "EX", this.ttlSeconds);
-                return true;
+                // Same user
+                if (forceTakeover) {
+                  // Force takeover requested - close existing tunnel and take over
+                  if (this.tunnels.has(tunnelId)) {
+                    const existingWs = this.tunnels.get(tunnelId);
+                    existingWs?.close();
+                    this.tunnels.delete(tunnelId);
+                  }
+                  await this.redis.set(key, redisValue, "EX", this.ttlSeconds);
+                  return true;
+                } else if (!this.tunnels.has(tunnelId)) {
+                  // Tunnel is not active, allow takeover
+                  await this.redis.set(key, redisValue, "EX", this.ttlSeconds);
+                  return true;
+                }
+                // Tunnel is actively connected, deny takeover
+                return false;
               }
             } catch (e) {
               // ignore parse error
