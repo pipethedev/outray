@@ -3,7 +3,7 @@ import { json } from "@tanstack/react-start";
 import { eq } from "drizzle-orm";
 import { auth } from "../../../lib/auth";
 import { db } from "../../../db";
-import { tunnels, subdomains } from "../../../db/app-schema";
+import { tunnels } from "../../../db/app-schema";
 import { redis } from "../../../lib/redis";
 
 export const Route = createFileRoute("/api/tunnels/")({
@@ -15,6 +15,25 @@ export const Route = createFileRoute("/api/tunnels/")({
           return json({ error: "Unauthorized" }, { status: 401 });
         }
 
+        const url = new URL(request.url);
+        const organizationId = url.searchParams.get("organizationId");
+
+        if (!organizationId) {
+          return json({ error: "Organization ID required" }, { status: 400 });
+        }
+
+        const organizations = await auth.api.listOrganizations({
+          headers: request.headers,
+        });
+
+        const hasAccess = organizations.find(
+          (org) => org.id === organizationId,
+        );
+
+        if (!hasAccess) {
+          return json({ error: "Unauthorized" }, { status: 403 });
+        }
+
         const userTunnels = await db
           .select({
             id: tunnels.id,
@@ -24,17 +43,27 @@ export const Route = createFileRoute("/api/tunnels/")({
             lastSeenAt: tunnels.lastSeenAt,
             createdAt: tunnels.createdAt,
             updatedAt: tunnels.updatedAt,
-            subdomain: subdomains.subdomain,
           })
           .from(tunnels)
-          .leftJoin(subdomains, eq(tunnels.id, subdomains.tunnelId))
-          .where(eq(tunnels.userId, session.user.id));
+          .where(eq(tunnels.organizationId, organizationId));
 
         const tunnelsWithStatus = await Promise.all(
           userTunnels.map(async (tunnel) => {
-            const isOnline = await redis.exists(
-              `tunnel:online:${tunnel.subdomain}`,
-            );
+            let subdomain = "";
+            try {
+              const urlObj = new URL(
+                tunnel.url.startsWith("http")
+                  ? tunnel.url
+                  : `https://${tunnel.url}`,
+              );
+              subdomain = urlObj.hostname.split(".")[0];
+            } catch (e) {
+              console.error("Failed to parse tunnel URL:", tunnel.url);
+            }
+
+            const isOnline = subdomain
+              ? await redis.exists(`tunnel:online:${subdomain}`)
+              : false;
             return {
               id: tunnel.id,
               url: tunnel.url,
