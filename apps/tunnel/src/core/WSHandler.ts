@@ -23,6 +23,7 @@ export class WSHandler {
     organizationId?: string;
     organization?: any;
     error?: string;
+    tokenType?: "legacy" | "org";
   }> {
     try {
       const response = await fetch(`${this.webApiUrl}/tunnel/auth`, {
@@ -36,6 +37,7 @@ export class WSHandler {
         organizationId?: string;
         organization?: any;
         error?: string;
+        tokenType?: "legacy" | "org";
       };
     } catch (error) {
       console.error("Failed to validate Auth Token:", error);
