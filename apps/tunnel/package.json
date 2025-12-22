@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsup src/server.ts --format cjs --target node20 --clean --sourcemap --shims && cp src/offline.html dist/",
+    "build": "tsup && cp src/offline.html dist/",
     "start": "node dist/server.js"
   },
   "dependencies": {

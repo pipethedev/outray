@@ -22,9 +22,8 @@ GREEN_NAME="outray-green"
 
 cd $APP_DIR
 
-# Install Server dependencies and build
-npm install
-npm run build
+# Install Server dependencies
+npm install --production
 
 # Determine which instance is currently running
 if pm2 list | grep -q "$BLUE_NAME.*online"; then
@@ -74,8 +73,7 @@ pm2 start dist/server.js --name $TARGET_NAME --update-env --force
 # 1.5 Start Internal Check Service
 echo "🔍 Starting Internal Check Service..."
 cd ../internal-check
-npm install
-npm run build
+npm install --production
 DATABASE_URL="$DATABASE_URL" \
 PORT=3001 \
 pm2 start dist/index.js --name "outray-internal-check" --update-env --force
