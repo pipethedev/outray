@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { json } from "@tanstack/react-start";
-import { eq } from "drizzle-orm";
+import { eq, and, gt } from "drizzle-orm";
 import { db } from "../../../db";
 import { authTokens } from "../../../db/app-schema";
+import { cliOrgTokens } from "../../../db/auth-schema";
 
 export const Route = createFileRoute("/api/tunnel/auth")({
   server: {
@@ -19,6 +20,38 @@ export const Route = createFileRoute("/api/tunnel/auth")({
             );
           }
 
+          // Try CLI org token first
+          const cliOrgToken = await db.query.cliOrgTokens.findFirst({
+            where: and(
+              eq(cliOrgTokens.token, token),
+              gt(cliOrgTokens.expiresAt, new Date()),
+            ),
+            with: {
+              organization: true,
+            },
+          });
+
+          if (cliOrgToken) {
+            // Update last used
+            await db
+              .update(cliOrgTokens)
+              .set({ lastUsedAt: new Date() })
+              .where(eq(cliOrgTokens.id, cliOrgToken.id));
+
+            return json({
+              valid: true,
+              userId: cliOrgToken.userId,
+              organizationId: cliOrgToken.organizationId,
+              organization: {
+                id: cliOrgToken.organization.id,
+                name: cliOrgToken.organization.name,
+                slug: cliOrgToken.organization.slug,
+              },
+              tokenType: "org",
+            });
+          }
+
+          // Fall back to legacy auth tokens
           const tokenRecord = await db.query.authTokens.findFirst({
             where: eq(authTokens.token, token),
             with: {
@@ -47,6 +80,7 @@ export const Route = createFileRoute("/api/tunnel/auth")({
               name: tokenRecord.organization.name,
               slug: tokenRecord.organization.slug,
             },
+            tokenType: "legacy",
           });
         } catch (error) {
           console.error("Error in /api/tunnel/auth:", error);
