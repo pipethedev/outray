@@ -387,20 +387,21 @@ function TunnelDetailView() {
             </button>
           </div>
 
-          <div className="bg-white/2 border border-white/5 rounded-2xl overflow-hidden">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-white/5 text-gray-400 font-medium">
-                <tr>
-                  <th className="px-6 py-3">Status</th>
-                  <th className="px-6 py-3">Method</th>
-                  <th className="px-6 py-3">Path</th>
-                  <th className="px-6 py-3">Time</th>
-                  <th className="px-6 py-3">Duration</th>
-                  <th className="px-6 py-3">Size</th>
-                  <th className="px-6 py-3"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
+          <div className="bg-white/2 border border-white/5 rounded-2xl overflow-hidden flex flex-col max-h-150">
+            <div className="overflow-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-white/5 text-gray-400 font-medium sticky top-0 z-10 backdrop-blur-md">
+                  <tr>
+                    <th className="px-6 py-3 bg-white/5">Status</th>
+                    <th className="px-6 py-3 bg-white/5">Method</th>
+                    <th className="px-6 py-3 bg-white/5">Path</th>
+                    <th className="px-6 py-3 bg-white/5">Time</th>
+                    <th className="px-6 py-3 bg-white/5">Duration</th>
+                    <th className="px-6 py-3 bg-white/5">Size</th>
+                    <th className="px-6 py-3 bg-white/5"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
                 {requests.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
@@ -435,6 +436,7 @@ function TunnelDetailView() {
                 )}
               </tbody>
             </table>
+            </div>
           </div>
         </div>
       )}
