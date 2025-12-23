@@ -37,6 +37,7 @@ import { Route as ApiStatsTunnelRouteImport } from './routes/api/stats/tunnel'
 import { Route as ApiStatsOverviewRouteImport } from './routes/api/stats/overview'
 import { Route as ApiMeOrgsRouteImport } from './routes/api/me/orgs'
 import { Route as ApiDomainsDomainIdRouteImport } from './routes/api/domains/$domainId'
+import { Route as ApiDomainVerifyOwnershipRouteImport } from './routes/api/domain/verify-ownership'
 import { Route as ApiCliLoginRouteImport } from './routes/api/cli/login'
 import { Route as ApiCliExchangeRouteImport } from './routes/api/cli/exchange'
 import { Route as ApiCliCompleteRouteImport } from './routes/api/cli/complete'
@@ -185,6 +186,12 @@ const ApiDomainsDomainIdRoute = ApiDomainsDomainIdRouteImport.update({
   path: '/api/domains/$domainId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiDomainVerifyOwnershipRoute =
+  ApiDomainVerifyOwnershipRouteImport.update({
+    id: '/api/domain/verify-ownership',
+    path: '/api/domain/verify-ownership',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiCliLoginRoute = ApiCliLoginRouteImport.update({
   id: '/api/cli/login',
   path: '/api/cli/login',
@@ -237,6 +244,7 @@ export interface FileRoutesByFullPath {
   '/api/cli/complete': typeof ApiCliCompleteRoute
   '/api/cli/exchange': typeof ApiCliExchangeRoute
   '/api/cli/login': typeof ApiCliLoginRouteWithChildren
+  '/api/domain/verify-ownership': typeof ApiDomainVerifyOwnershipRoute
   '/api/domains/$domainId': typeof ApiDomainsDomainIdRouteWithChildren
   '/api/me/orgs': typeof ApiMeOrgsRoute
   '/api/stats/overview': typeof ApiStatsOverviewRoute
@@ -272,6 +280,7 @@ export interface FileRoutesByTo {
   '/api/cli/complete': typeof ApiCliCompleteRoute
   '/api/cli/exchange': typeof ApiCliExchangeRoute
   '/api/cli/login': typeof ApiCliLoginRouteWithChildren
+  '/api/domain/verify-ownership': typeof ApiDomainVerifyOwnershipRoute
   '/api/domains/$domainId': typeof ApiDomainsDomainIdRouteWithChildren
   '/api/me/orgs': typeof ApiMeOrgsRoute
   '/api/stats/overview': typeof ApiStatsOverviewRoute
@@ -309,6 +318,7 @@ export interface FileRoutesById {
   '/api/cli/complete': typeof ApiCliCompleteRoute
   '/api/cli/exchange': typeof ApiCliExchangeRoute
   '/api/cli/login': typeof ApiCliLoginRouteWithChildren
+  '/api/domain/verify-ownership': typeof ApiDomainVerifyOwnershipRoute
   '/api/domains/$domainId': typeof ApiDomainsDomainIdRouteWithChildren
   '/api/me/orgs': typeof ApiMeOrgsRoute
   '/api/stats/overview': typeof ApiStatsOverviewRoute
@@ -347,6 +357,7 @@ export interface FileRouteTypes {
     | '/api/cli/complete'
     | '/api/cli/exchange'
     | '/api/cli/login'
+    | '/api/domain/verify-ownership'
     | '/api/domains/$domainId'
     | '/api/me/orgs'
     | '/api/stats/overview'
@@ -382,6 +393,7 @@ export interface FileRouteTypes {
     | '/api/cli/complete'
     | '/api/cli/exchange'
     | '/api/cli/login'
+    | '/api/domain/verify-ownership'
     | '/api/domains/$domainId'
     | '/api/me/orgs'
     | '/api/stats/overview'
@@ -418,6 +430,7 @@ export interface FileRouteTypes {
     | '/api/cli/complete'
     | '/api/cli/exchange'
     | '/api/cli/login'
+    | '/api/domain/verify-ownership'
     | '/api/domains/$domainId'
     | '/api/me/orgs'
     | '/api/stats/overview'
@@ -449,6 +462,7 @@ export interface RootRouteChildren {
   ApiCliCompleteRoute: typeof ApiCliCompleteRoute
   ApiCliExchangeRoute: typeof ApiCliExchangeRoute
   ApiCliLoginRoute: typeof ApiCliLoginRouteWithChildren
+  ApiDomainVerifyOwnershipRoute: typeof ApiDomainVerifyOwnershipRoute
   ApiDomainsDomainIdRoute: typeof ApiDomainsDomainIdRouteWithChildren
   ApiMeOrgsRoute: typeof ApiMeOrgsRoute
   ApiStatsOverviewRoute: typeof ApiStatsOverviewRoute
@@ -659,6 +673,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiDomainsDomainIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/domain/verify-ownership': {
+      id: '/api/domain/verify-ownership'
+      path: '/api/domain/verify-ownership'
+      fullPath: '/api/domain/verify-ownership'
+      preLoaderRoute: typeof ApiDomainVerifyOwnershipRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/cli/login': {
       id: '/api/cli/login'
       path: '/api/cli/login'
@@ -777,6 +798,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCliCompleteRoute: ApiCliCompleteRoute,
   ApiCliExchangeRoute: ApiCliExchangeRoute,
   ApiCliLoginRoute: ApiCliLoginRouteWithChildren,
+  ApiDomainVerifyOwnershipRoute: ApiDomainVerifyOwnershipRoute,
   ApiDomainsDomainIdRoute: ApiDomainsDomainIdRouteWithChildren,
   ApiMeOrgsRoute: ApiMeOrgsRoute,
   ApiStatsOverviewRoute: ApiStatsOverviewRoute,
