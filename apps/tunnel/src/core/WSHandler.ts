@@ -344,12 +344,13 @@ export class WSHandler {
 
             tunnelId = requestedSubdomain;
 
-            // Construct the tunnel URL
+            // Construct the tunnel URL and full hostname
             const protocol =
               config.baseDomain === "localhost.direct" ? "http" : "https";
             const portSuffix =
               config.baseDomain === "localhost.direct" ? `:${config.port}` : "";
-            const tunnelUrl = `${protocol}://${tunnelId}.${config.baseDomain}${portSuffix}`;
+            const fullHostname = `${tunnelId}.${config.baseDomain}`;
+            const tunnelUrl = `${protocol}://${fullHostname}${portSuffix}`;
 
             let dbTunnelId: string | undefined;
             if (userId && organizationId) {
@@ -361,14 +362,19 @@ export class WSHandler {
               if (id) dbTunnelId = id;
             }
 
-            const registered = await this.router.registerTunnel(tunnelId, ws, {
-              organizationId,
-              userId,
-              dbTunnelId,
-            });
+            // Use full hostname as tunnel ID for consistency
+            const registered = await this.router.registerTunnel(
+              fullHostname,
+              ws,
+              {
+                organizationId,
+                userId,
+                dbTunnelId,
+              },
+            );
 
             if (!registered) {
-              await this.router.unregisterTunnel(tunnelId);
+              await this.router.unregisterTunnel(fullHostname);
               tunnelId = null;
               ws.send(
                 Protocol.encode({
@@ -381,14 +387,17 @@ export class WSHandler {
               return;
             }
 
+            // Update tunnelId to full hostname for message routing
+            tunnelId = fullHostname;
+
             const response = Protocol.encode({
               type: "tunnel_opened",
-              tunnelId,
+              tunnelId: fullHostname,
               url: tunnelUrl,
             });
 
             ws.send(response);
-            console.log(`Tunnel opened: ${tunnelId}`);
+            console.log(`Tunnel opened: ${fullHostname}`);
           } else if (tunnelId) {
             this.router.handleMessage(tunnelId, message);
           }
