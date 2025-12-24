@@ -180,7 +180,7 @@ export function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
         )}
       </div>
 
-      <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto scrollbar-hide">
+      <nav className="flex-1 px-2 py-4 space-y-0.5 overflow-y-auto scrollbar-hide">
         {!isCollapsed && (
           <div className="px-4 mt-2 mb-2 text-[10px] font-bold text-gray-600 uppercase tracking-wider">
             Platform
@@ -335,7 +335,7 @@ function NavItem({
           "text-gray-400 hover:text-white hover:bg-white/5 border border-transparent",
       }}
       activeOptions={activeOptions}
-      className={`flex items-center ${isCollapsed ? "justify-center px-2" : "gap-3 px-3"} w-full py-2.5 text-sm rounded-xl transition-all duration-200 group relative`}
+      className={`flex items-center ${isCollapsed ? "justify-center px-2" : "gap-3 px-3"} w-full py-2 text-sm rounded-xl transition-all duration-200 group relative`}
     >
       {icon}
       {!isCollapsed && <span>{label}</span>}
