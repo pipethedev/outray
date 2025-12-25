@@ -24,6 +24,7 @@ export class WSHandler {
     organization?: any;
     error?: string;
     tokenType?: "legacy" | "org";
+    bandwidthLimit?: number;
   }> {
     try {
       const response = await fetch(`${this.webApiUrl}/tunnel/auth`, {
@@ -38,6 +39,7 @@ export class WSHandler {
         organization?: any;
         error?: string;
         tokenType?: "legacy" | "org";
+        bandwidthLimit?: number;
       };
     } catch (error) {
       console.error("Failed to validate Auth Token:", error);
@@ -136,6 +138,7 @@ export class WSHandler {
           } else if (message.type === "open_tunnel") {
             let organizationId: string | undefined;
             let userId: string | undefined;
+            let bandwidthLimit: number | undefined;
 
             if (message.apiKey) {
               const authResult = await this.validateAuthToken(message.apiKey);
@@ -153,6 +156,7 @@ export class WSHandler {
               }
               organizationId = authResult.organizationId;
               userId = authResult.userId;
+              bandwidthLimit = authResult.bandwidthLimit;
               console.log(
                 `Authenticated organization: ${authResult.organization?.name}`,
               );
@@ -212,6 +216,7 @@ export class WSHandler {
                   organizationId,
                   userId,
                   dbTunnelId,
+                  bandwidthLimit,
                 },
               );
 
@@ -272,6 +277,7 @@ export class WSHandler {
                   {
                     organizationId,
                     userId,
+                    bandwidthLimit,
                   },
                   message.forceTakeover || false,
                 );
@@ -304,6 +310,7 @@ export class WSHandler {
                     {
                       organizationId,
                       userId,
+                      bandwidthLimit,
                     },
                   );
                   if (reservationAcquired) {
@@ -321,6 +328,7 @@ export class WSHandler {
                   {
                     organizationId,
                     userId,
+                    bandwidthLimit,
                   },
                 );
                 if (reservationAcquired) {
@@ -370,6 +378,7 @@ export class WSHandler {
                 organizationId,
                 userId,
                 dbTunnelId,
+                bandwidthLimit,
               },
             );
 
