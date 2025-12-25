@@ -21,6 +21,7 @@ export interface TunnelMetadata {
   organizationId?: string;
   userId?: string;
   dbTunnelId?: string;
+  bandwidthLimit?: number;
 }
 
 export class TunnelRouter {
@@ -46,6 +47,10 @@ export class TunnelRouter {
     if (this.redis) {
       this.startHeartbeat();
     }
+  }
+
+  getRedis(): Redis | undefined {
+    return this.redis;
   }
 
   async registerTunnel(
