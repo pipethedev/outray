@@ -17,6 +17,7 @@ export async function initiateCheckout(
 }
 
 export const POLAR_PRODUCT_IDS = {
-  ray: process.env.POLAR_PRODUCT_RAY || "",
-  beam: process.env.POLAR_PRODUCT_BEAM || "",
+  ray: import.meta.env.VITE_POLAR_PRODUCT_RAY || "",
+  beam: import.meta.env.VITE_POLAR_PRODUCT_BEAM || "",
+  pulse: import.meta.env.VITE_POLAR_PRODUCT_PULSE || "",
 } as const;
