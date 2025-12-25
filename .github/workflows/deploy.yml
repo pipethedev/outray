@@ -31,6 +31,12 @@ jobs:
           npm install
           npm run build
 
+      - name: Build Cron
+        run: |
+          cd apps/cron
+          npm install
+          npm run build
+
       - name: Deploy Tunnel Files
         uses: appleboy/scp-action@master
         with:
@@ -51,6 +57,17 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           source: "apps/internal-check/dist,apps/internal-check/package.json"
           target: "/root/outray/internal-check"
+          strip_components: 2
+
+      - name: Deploy Cron Files
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "apps/cron/dist,apps/cron/package.json"
+          target: "/root/outray/cron"
           strip_components: 2
 
       - name: Deploy Script

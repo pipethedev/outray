@@ -79,6 +79,18 @@ PORT=3001 \
 pm2 start dist/index.js --name "outray-internal-check" --update-env --force
 cd $APP_DIR
 
+# 1.6 Start Cron Service
+echo "⏰ Starting Cron Service..."
+cd ../cron
+npm install --production
+REDIS_URL="$REDIS_URL" \
+CLICKHOUSE_HOST="$CLICKHOUSE_URL" \
+CLICKHOUSE_USER="$CLICKHOUSE_USER" \
+CLICKHOUSE_PASSWORD="$CLICKHOUSE_PASSWORD" \
+CLICKHOUSE_DATABASE="$CLICKHOUSE_DATABASE" \
+pm2 start dist/index.js --name "outray-cron" --update-env --force
+cd $APP_DIR
+
 echo "⏳ Waiting for tunnel server to be ready..."
 sleep 5
 

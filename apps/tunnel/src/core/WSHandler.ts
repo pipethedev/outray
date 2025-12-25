@@ -225,6 +225,7 @@ export class WSHandler {
                   userId,
                   dbTunnelId,
                   bandwidthLimit,
+                  plan,
                 },
               );
 
@@ -392,6 +393,7 @@ export class WSHandler {
                 dbTunnelId,
                 bandwidthLimit,
                 retentionDays,
+                plan,
               },
             );
 
