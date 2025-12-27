@@ -1,0 +1,45 @@
+import { AlertCircle } from "lucide-react";
+
+interface DomainLimitWarningProps {
+  isAtLimit: boolean;
+  domainLimit: number;
+  currentPlan: string;
+}
+
+export function DomainLimitWarning({
+  isAtLimit,
+  domainLimit,
+  currentPlan,
+}: DomainLimitWarningProps) {
+  if (!isAtLimit) return null;
+
+  return (
+    <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 flex items-start gap-3">
+      <AlertCircle className="w-5 h-5 text-yellow-500 shrink-0 mt-0.5" />
+      <div>
+        <p className="text-sm font-medium text-yellow-500">
+          Domain limit reached
+        </p>
+        <p className="text-xs text-gray-400 mt-1">
+          You've reached your plan's limit of {domainLimit} custom domains.
+          {currentPlan === "ray" && (
+            <>
+              {" "}
+              Go to{" "}
+              <a
+                href="/dash/billing"
+                className="text-yellow-500 hover:underline"
+              >
+                Billing
+              </a>{" "}
+              to add more domain slots or upgrade to Beam for unlimited domains.
+            </>
+          )}
+          {currentPlan === "free" && (
+            <> Upgrade to a paid plan to add custom domains.</>
+          )}
+        </p>
+      </div>
+    </div>
+  );
+}
