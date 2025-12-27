@@ -13,9 +13,9 @@ import { authClient } from "../../lib/auth-client";
 
 export const Route = createFileRoute("/dash/billing")({
   component: BillingView,
-  validateSearch: (search: Record<string, unknown>) => {
+  validateSearch: (search?: Record<string, unknown>) => {
     return {
-      success: search.success === "true" || search.success === true,
+      success: search?.success === "true" || search?.success === true,
     };
   },
 });
