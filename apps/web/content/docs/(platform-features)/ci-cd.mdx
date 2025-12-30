@@ -1,0 +1,32 @@
+---
+title: CI/CD Integration
+description: Automate tunnels in your CI/CD pipelines
+icon: Workflow
+---
+
+OutRay is perfect for preview environments in CI/CD pipelines. By using API keys, you can automate tunnel creation without interactive login.
+
+## Setup
+
+1.  **Generate API Key**: Go to your organization settings in the dashboard and generate a new API Key.
+2.  **Store Secret**: Store the API key as a secret in your CI provider (e.g., `OUTRAY_API_KEY`).
+
+## Usage
+
+Use the `--key` flag to authenticate the tunnel:
+
+```bash
+outray 3000 --key $OUTRAY_API_KEY
+```
+
+## Example: GitHub Actions
+
+Here is a simple example of how to use OutRay in a GitHub Action:
+
+```yaml
+steps:
+  - name: Start Tunnel
+    run: |
+      npm install -g outray
+      outray 3000 --key ${{ secrets.OUTRAY_API_KEY }} &
+```

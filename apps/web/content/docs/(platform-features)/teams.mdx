@@ -1,0 +1,41 @@
+---
+title: Teams & Organizations
+description: Collaborate with your team on OutRay
+icon: Users
+---
+
+OutRay is built for collaboration. You can create organizations and invite team members to share resources.
+
+## Features
+
+- **Shared Domains**: Any domain added to an organization is available to all members.
+- **Centralized Billing**: Manage subscriptions for your entire team in one place.
+- **Role-Based Access**: Control who can manage domains and billing.
+
+## Switching Organizations
+
+If you belong to multiple organizations, you can switch between them using the CLI.
+
+### Interactive Switch
+
+Run the following command to see a list of your organizations and select one:
+
+```bash
+outray switch
+```
+
+### Direct Switch
+
+If you know the slug of the organization you want to switch to, you can pass it directly:
+
+```bash
+outray switch my-org-slug
+```
+
+### Per-Command Override
+
+You can also override the active organization for a single command using the `--org` flag:
+
+```bash
+outray 3000 --org my-other-org
+```

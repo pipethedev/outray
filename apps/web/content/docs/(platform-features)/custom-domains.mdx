@@ -1,0 +1,21 @@
+---
+title: Custom Domains
+description: Use your own domain names for tunnels
+icon: Globe
+---
+
+OutRay allows you to white-label your tunnels by using your own domain names. Instead of `random-name.tunnel.outray.app`, you can use `api.yourcompany.com`.
+
+## Setup
+
+1.  **Add Domain**: Go to the **Domains** section in your dashboard and add your domain (e.g., `tunnel.yourcompany.com`).
+2.  **DNS Configuration**: Create a CNAME record in your DNS provider pointing to `edge.outray.app`.
+3.  **Verification**: OutRay will automatically verify the DNS record and issue an SSL certificate.
+
+## Usage
+
+Once your domain is verified, you can use it with the `--domain` flag:
+
+```bash
+outray 3000 --domain tunnel.yourcompany.com
+```

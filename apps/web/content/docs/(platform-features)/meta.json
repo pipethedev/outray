@@ -1,0 +1,10 @@
+{
+  "title": "Platform Features",
+  "pages": [
+    "reserved-subdomains",
+    "custom-domains",
+    "teams",
+    "ci-cd",
+    "observability"
+  ]
+}

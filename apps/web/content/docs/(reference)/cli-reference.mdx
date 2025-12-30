@@ -1,0 +1,73 @@
+---
+title: CLI Reference
+description: Comprehensive guide to the OutRay CLI commands and flags
+icon: TerminalSquare
+---
+
+The OutRay CLI is your primary tool for interacting with the OutRay network. This reference covers all available commands and flags.
+
+## Commands
+
+### `outray login`
+
+Initiates the authentication process. This command opens your default browser to the OutRay dashboard where you can authorize the CLI.
+
+```bash
+outray login
+```
+
+Once authenticated, your session token is stored locally in your configuration file.
+
+### `outray <port>`
+
+Starts a tunnel for the specified local port. This is the most common command you will use.
+
+```bash
+outray 3000
+```
+
+**Arguments:**
+
+- `port`: The local port number you want to expose (e.g., `3000`, `8080`).
+
+**Options:**
+
+- `--subdomain <name>`: Request a specific subdomain.
+- `--domain <domain>`: Use a custom domain.
+- `--org <slug>`: Run the tunnel under a specific organization.
+- `--key <token>`: Use a specific API key instead of the logged-in user.
+
+### `outray switch`
+
+Switch between organizations. If you belong to multiple organizations, you can use this command to change your active context.
+
+```bash
+# Interactive selection
+outray switch
+
+# Direct switch
+outray switch my-org-slug
+```
+
+### `outray whoami`
+
+Displays information about the currently authenticated user and the active organization.
+
+```bash
+outray whoami
+```
+
+### `outray logout`
+
+Clears the local authentication credentials.
+
+```bash
+outray logout
+```
+
+## Global Flags
+
+These flags can be used with most commands:
+
+- `--version`, `-v`: Display the current CLI version.
+- `--help`, `-h`: Display help information.

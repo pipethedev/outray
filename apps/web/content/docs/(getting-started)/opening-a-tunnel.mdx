@@ -1,0 +1,34 @@
+---
+title: Opening a Tunnel
+description: How to expose your local server to the internet
+icon: Zap
+---
+
+Once you are authenticated, you can start exposing your local services to the internet.
+
+## Basic Usage
+
+To expose a local server running on a specific port (e.g., 3000), simply run:
+
+```bash
+outray 3000
+```
+
+You will see an output similar to this:
+
+```bash
+✨ Connecting to OutRay...
+🔌 Linked to your local port 3000
+🌐 Tunnel ready: https://random-name.tunnel.outray.app
+🥹 Don't close this or I'll cry softly.
+```
+
+Now, anyone with the public URL can access your local server.
+
+## Inspecting Traffic
+
+OutRay provides a real-time view of requests and responses in your terminal. As requests come in, you will see the method, path, and status code.
+
+## Stopping the Tunnel
+
+To stop the tunnel, simply press `Ctrl+C` in your terminal. This will close the connection and the public URL will no longer be accessible.

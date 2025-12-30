@@ -20,7 +20,27 @@
   }
 }
 
+@theme {
+  --color-fd-background: #000000;
+  --color-fd-foreground: #ffffff;
+  --color-fd-card: #0a0a0a;
+  --color-fd-card-foreground: #ffffff;
+  --color-fd-popover: #0a0a0a;
+  --color-fd-popover-foreground: #ffffff;
+  --color-fd-primary: #ffa62b;
+  --color-fd-primary-foreground: #000000;
+  --color-fd-secondary: #1a1a1a;
+  --color-fd-secondary-foreground: #ffffff;
+  --color-fd-muted: #1a1a1a;
+  --color-fd-muted-foreground: #a1a1aa;
+  --color-fd-accent: #ffa62b;
+  --color-fd-accent-foreground: #000000;
+  --color-fd-border: #262626;
+  --color-fd-input: #262626;
+  --color-fd-ring: #ffa62b;
+}
+
 body {
-  background-color: #000000;
-  color: #ffffff;
+  background-color: var(--color-fd-background);
+  color: var(--color-fd-foreground);
 }

@@ -1,0 +1,21 @@
+---
+title: Reserved Subdomains
+description: How to use persistent subdomains for your tunnels
+icon: Bookmark
+---
+
+By default, OutRay assigns a random subdomain to your tunnel each time you start it. However, for many use cases (like webhooks or OAuth callbacks), you need a consistent URL.
+
+## Usage
+
+You can request a specific subdomain using the `--subdomain` flag:
+
+```bash
+outray 3000 --subdomain my-app
+```
+
+If the subdomain is available, your public URL will be `https://my-app.tunnel.outray.app`.
+
+## Reservation
+
+Subdomains are reserved for your organization. Once you successfully use a subdomain, it is linked to your organization, and no other user can claim it.

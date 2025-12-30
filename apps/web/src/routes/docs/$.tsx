@@ -12,6 +12,7 @@ import {
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import { baseOptions } from "@/lib/layout.shared";
 import { useFumadocsLoader } from "fumadocs-core/source/client";
+import { Mermaid } from "@/components/mdx/mermaid";
 
 export const Route = createFileRoute("/docs/$")({
   component: Page,
@@ -47,6 +48,7 @@ const clientLoader = browserCollections.docs.createClientLoader({
           <MDX
             components={{
               ...defaultMdxComponents,
+              Mermaid,
             }}
           />
         </DocsBody>
@@ -61,7 +63,13 @@ function Page() {
   const Content = clientLoader.getComponent(data.path);
 
   return (
-    <DocsLayout {...baseOptions()} tree={pageTree}>
+    <DocsLayout
+      {...baseOptions()}
+      tree={pageTree}
+      sidebar={{
+        collapsible: false,
+      }}
+    >
       <Content />
     </DocsLayout>
   );
