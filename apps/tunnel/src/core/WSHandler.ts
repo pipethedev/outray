@@ -1,18 +1,35 @@
 import WebSocket, { WebSocketServer } from "ws";
 import { Server as HTTPServer } from "http";
 import { TunnelRouter } from "./TunnelRouter";
-import { Protocol, Message } from "./Protocol";
+import { TCPProxy } from "./TCPProxy";
+import { UDPProxy } from "./UDPProxy";
+import {
+  Protocol,
+  Message,
+  TCPDataMessage,
+  TCPCloseMessage,
+  UDPResponseMessage,
+} from "./Protocol";
 import { generateId, generateSubdomain } from "../../../../shared/utils";
 import { config } from "../config";
 
 export class WSHandler {
   private wss: WebSocketServer;
   private router: TunnelRouter;
+  private tcpProxy: TCPProxy;
+  private udpProxy: UDPProxy;
   private webApiUrl: string;
 
-  constructor(wss: WebSocketServer, router: TunnelRouter) {
+  constructor(
+    wss: WebSocketServer,
+    router: TunnelRouter,
+    tcpProxy?: TCPProxy,
+    udpProxy?: UDPProxy,
+  ) {
     this.router = router;
     this.wss = wss;
+    this.tcpProxy = tcpProxy || new TCPProxy();
+    this.udpProxy = udpProxy || new UDPProxy();
     this.webApiUrl = process.env.WEB_API_URL || "http://localhost:3000/api";
     this.setupWebSocketServer();
   }
@@ -80,6 +97,12 @@ export class WSHandler {
     userId: string,
     organizationId: string,
     url: string,
+    options?: {
+      protocol?: "http" | "tcp" | "udp";
+      remotePort?: number;
+      tunnelId?: string;
+      name?: string;
+    },
   ): Promise<{ success: boolean; tunnelId?: string; error?: string }> {
     try {
       const response = await fetch(`${this.webApiUrl}/tunnel/register`, {
@@ -89,6 +112,10 @@ export class WSHandler {
           userId,
           organizationId,
           url,
+          protocol: options?.protocol || "http",
+          remotePort: options?.remotePort,
+          tunnelId: options?.tunnelId,
+          name: options?.name,
         }),
       });
 
@@ -182,6 +209,176 @@ export class WSHandler {
               );
             }
 
+            const tunnelProtocol = message.protocol || "http";
+            if (tunnelProtocol === "tcp" || tunnelProtocol === "udp") {
+              if (!organizationId) {
+                ws.send(
+                  Protocol.encode({
+                    type: "error",
+                    code: "AUTH_REQUIRED",
+                    message: "Authentication required for TCP/UDP tunnels",
+                  }),
+                );
+                ws.close();
+                return;
+              }
+
+              const tunnelName = generateSubdomain();
+              const tunnelIdForProtocol = tunnelName;
+
+              if (tunnelProtocol === "tcp") {
+                const result = await this.tcpProxy.createTunnel(
+                  tunnelIdForProtocol,
+                  ws,
+                  organizationId || "",
+                  message.remotePort,
+                  bandwidthLimit,
+                );
+
+                if (!result.success) {
+                  ws.send(
+                    Protocol.encode({
+                      type: "error",
+                      code: "TCP_TUNNEL_FAILED",
+                      message: result.error || "Failed to create TCP tunnel",
+                    }),
+                  );
+                  ws.close();
+                  return;
+                }
+
+                // Register tunnel in database first to get dbTunnelId
+                let dbTunnelId: string | undefined;
+                if (userId && organizationId) {
+                  const dbResult = await this.registerTunnelInDatabase(
+                    userId,
+                    organizationId,
+                    `tcp://${tunnelName}.${config.baseDomain}:${result.port}`,
+                    {
+                      protocol: "tcp",
+                      remotePort: result.port,
+                      tunnelId: tunnelIdForProtocol,
+                      name: tunnelName,
+                    },
+                  );
+                  if (!dbResult.success) {
+                    console.error(
+                      `Failed to register TCP tunnel in database: ${dbResult.error}`,
+                    );
+                  } else {
+                    dbTunnelId = dbResult.tunnelId;
+                    // Set the dbTunnelId on the TCP proxy for logging
+                    if (dbTunnelId) {
+                      this.tcpProxy.setDbTunnelId(
+                        tunnelIdForProtocol,
+                        dbTunnelId,
+                      );
+                    }
+                  }
+                }
+
+                // Reserve tunnel in Redis for routing (with dbTunnelId for online tracking)
+                await this.router.reserveTunnel(tunnelIdForProtocol, ws, {
+                  organizationId,
+                  userId,
+                  dbTunnelId,
+                  bandwidthLimit,
+                  retentionDays,
+                });
+
+                tunnelId = tunnelIdForProtocol;
+                ws.send(
+                  Protocol.encode({
+                    type: "tunnel_opened",
+                    tunnelId: tunnelIdForProtocol,
+                    url: `tcp://${tunnelName}.${config.baseDomain}:${result.port}`,
+                    protocol: "tcp",
+                    port: result.port,
+                    plan,
+                  }),
+                );
+                console.log(
+                  `TCP tunnel opened: ${tunnelIdForProtocol} on port ${result.port}`,
+                );
+              } else {
+                // UDP
+                const result = await this.udpProxy.createTunnel(
+                  tunnelIdForProtocol,
+                  ws,
+                  organizationId || "",
+                  message.remotePort,
+                  bandwidthLimit,
+                );
+
+                if (!result.success) {
+                  ws.send(
+                    Protocol.encode({
+                      type: "error",
+                      code: "UDP_TUNNEL_FAILED",
+                      message: result.error || "Failed to create UDP tunnel",
+                    }),
+                  );
+                  ws.close();
+                  return;
+                }
+
+                // Register tunnel in database first to get dbTunnelId
+                let dbTunnelId: string | undefined;
+                if (userId && organizationId) {
+                  const dbResult = await this.registerTunnelInDatabase(
+                    userId,
+                    organizationId,
+                    `udp://${tunnelName}.${config.baseDomain}:${result.port}`,
+                    {
+                      protocol: "udp",
+                      remotePort: result.port,
+                      tunnelId: tunnelIdForProtocol,
+                      name: tunnelName,
+                    },
+                  );
+                  if (!dbResult.success) {
+                    console.error(
+                      `Failed to register UDP tunnel in database: ${dbResult.error}`,
+                    );
+                  } else {
+                    dbTunnelId = dbResult.tunnelId;
+                    // Set the dbTunnelId on the UDP proxy for logging
+                    if (dbTunnelId) {
+                      this.udpProxy.setDbTunnelId(
+                        tunnelIdForProtocol,
+                        dbTunnelId,
+                      );
+                    }
+                  }
+                }
+
+                // Reserve tunnel in Redis for routing (with dbTunnelId for online tracking)
+                await this.router.reserveTunnel(tunnelIdForProtocol, ws, {
+                  organizationId,
+                  userId,
+                  dbTunnelId,
+                  bandwidthLimit,
+                  retentionDays,
+                });
+
+                tunnelId = tunnelIdForProtocol;
+                ws.send(
+                  Protocol.encode({
+                    type: "tunnel_opened",
+                    tunnelId: tunnelIdForProtocol,
+                    url: `udp://${tunnelName}.${config.baseDomain}:${result.port}`,
+                    protocol: "udp",
+                    port: result.port,
+                    plan,
+                  }),
+                );
+                console.log(
+                  `UDP tunnel opened: ${tunnelIdForProtocol} on port ${result.port}`,
+                );
+              }
+              return;
+            }
+
             // Check if custom domain is requested
             if (message.customDomain) {
               if (!organizationId) {
@@ -225,6 +422,9 @@ export class WSHandler {
                   userId,
                   organizationId,
                   tunnelUrl,
+                  {
+                    name: message.customDomain,
+                  },
                 );
                 if (!result.success) {
                   ws.send(
@@ -309,6 +509,7 @@ export class WSHandler {
                 const fullHostname = `${requestedSubdomain}.${config.baseDomain}`;
                 reservationAcquired = await this.router.reserveTunnel(
                   fullHostname,
+                  ws,
                   {
                     organizationId,
                     userId,
@@ -344,6 +545,7 @@ export class WSHandler {
                   const fullHostname = `${candidate}.${config.baseDomain}`;
                   reservationAcquired = await this.router.reserveTunnel(
                     fullHostname,
+                    ws,
                     {
                       organizationId,
                       userId,
@@ -364,6 +566,7 @@ export class WSHandler {
                 const fullHostname = `${fallback}.${config.baseDomain}`;
                 reservationAcquired = await this.router.reserveTunnel(
                   fullHostname,
+                  ws,
                   {
                     organizationId,
                     userId,
@@ -407,15 +610,19 @@ export class WSHandler {
                 userId,
                 organizationId,
                 tunnelUrl,
+                {
+                  name: requestedSubdomain,
+                },
               );
               if (!result.success) {
                 // Remove the reserved tunnel from Redis since we're rejecting it
                 const redis = this.router.getRedis();
-                if (redis && organizationId) {
-                  await redis.zrem(
-                    `org:${organizationId}:active_tunnels`,
-                    fullHostname,
+                if (redis && organizationId && result.tunnelId) {
+                  await redis.srem(
+                    `org:${organizationId}:online_tunnels`,
+                    result.tunnelId,
                   );
+                  await redis.del(`tunnel:last_seen:${result.tunnelId}`);
                   await redis.del(`tunnel:online:${fullHostname}`);
                 }
 
@@ -472,6 +679,19 @@ export class WSHandler {
 
             ws.send(response);
             console.log(`Tunnel opened: ${fullHostname}`);
+          } else if (message.type === "tcp_data" && tunnelId) {
+            // Handle TCP data from client (response to external connection)
+            const tcpMessage = message as TCPDataMessage;
+            const data = Buffer.from(tcpMessage.data, "base64");
+            this.tcpProxy.handleClientData(tcpMessage.connectionId, data);
+          } else if (message.type === "tcp_close" && tunnelId) {
+            // Handle TCP close from client
+            const tcpMessage = message as TCPCloseMessage;
+            this.tcpProxy.handleClientClose(tcpMessage.connectionId);
+          } else if (message.type === "udp_response" && tunnelId) {
+            // Handle UDP response from client
+            const udpMessage = message as UDPResponseMessage;
+            this.udpProxy.handleClientResponse(udpMessage);
           } else if (tunnelId) {
             this.router.handleMessage(tunnelId, message);
           }
@@ -482,6 +702,13 @@ export class WSHandler {
 
       ws.on("close", (code, reason) => {
         if (tunnelId) {
+          // Clean up TCP/UDP tunnels if they exist
+          if (this.tcpProxy.hasTunnel(tunnelId)) {
+            void this.tcpProxy.closeTunnel(tunnelId);
+          }
+          if (this.udpProxy.hasTunnel(tunnelId)) {
+            void this.udpProxy.closeTunnel(tunnelId);
+          }
           void this.router.unregisterTunnel(tunnelId, ws);
           console.log(
             `Tunnel closed: ${tunnelId} (Code: ${code}, Reason: ${reason})`,
